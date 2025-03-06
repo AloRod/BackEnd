@@ -3,25 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Video extends Model
 {
-    protected $fillable = 
-    [
-    'name', 
-    'url', 
-    'description',
-    'playlists',
-    'user_id'
+    protected $fillable = [
+        'name',
+        'url',
+        'description',
+        'user_id'
     ];
 
     /**
-     * Relación: Un video pertenece a una playlist.
+     * Relación: Un video pertenece a varias playlists.
      */
-    public function playlist(): BelongsTo
+    public function playlists()
     {
-        return $this->belongsTo(Playlist::class);
+        return $this->belongsToMany(Playlist::class, 'playlist_video', 'video_id', 'playlist_id');
     }
 }
+
 
