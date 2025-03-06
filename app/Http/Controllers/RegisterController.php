@@ -6,11 +6,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-
 class RegisterController extends Controller
 {
     public function register(Request $request) {
-        // Validaciones
+        // Validations
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
@@ -21,21 +20,21 @@ class RegisterController extends Controller
             'lastname' => 'required',
             'birthdate' => 'required|date',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-    
-        // Verifica si es mayor de 18 años
+
+        // Check if the user is over 18 years old
         $birthDate = new \DateTime($request->birthdate);
         $now = new \DateTime();
         $age = $now->diff($birthDate)->y;
-    
+
         if ($age < 18) {
-            return response()->json(['error' => 'Debes ser mayor de 18 años'], 403);
+            return response()->json(['error' => 'You must be over 18 years old'], 403);
         }
-    
-        // Crear usuario
+
+        // Create user
         $user = User::create([
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -48,8 +47,7 @@ class RegisterController extends Controller
             'status' => $request->status ?? 'pending',
             'verification_token' => bin2hex(random_bytes(16)),
         ]);
-    
-        return response()->json(['message' => 'Registro exitoso', 'user' => $user], 201);
+
+        return response()->json(['message' => 'Registration successful', 'user' => $user], 201);
     }
-    
 }
