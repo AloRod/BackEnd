@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Playlist;
@@ -12,7 +11,7 @@ class VideoController extends Controller
     {
         // Validación de los datos de entrada
         $request->validate([
-            'title' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'url' => 'required|url',
             'description' => 'nullable|string',
         ]);
@@ -20,11 +19,14 @@ class VideoController extends Controller
         $playlist = Playlist::findOrFail($playlist_id);
 
         $video = new Video();
-        $video->title = $request->input('title');
+        $video->name = $request->input('name');
         $video->url = $request->input('url');
         $video->description = $request->input('description');
-        $video->playlist_id = $playlist->id;
+        $video->user_id = $request->input('user_id');
         $video->save();
+
+        // Relacionar el video con la playlist
+        $video->playlists()->attach($playlist->id);
 
         return response()->json($video, 201);
     }
@@ -32,7 +34,7 @@ class VideoController extends Controller
     public function index($playlist_id)
     {
         $playlist = Playlist::findOrFail($playlist_id);
-        $videos = $playlist->videos; // Suponiendo que la relación está definida
+        $videos = $playlist->videos; // Relación definida en el modelo Playlist
 
         return response()->json($videos);
     }
@@ -50,7 +52,7 @@ class VideoController extends Controller
         $playlist = Playlist::findOrFail($playlist_id);
         $video = $playlist->videos()->findOrFail($video_id);
 
-        $video->update($request->only(['title', 'url', 'description']));
+        $video->update($request->only(['name', 'url', 'description']));
 
         return response()->json($video);
     }
@@ -65,4 +67,3 @@ class VideoController extends Controller
         return response()->json(null, 204);
     }
 }
-

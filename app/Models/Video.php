@@ -13,13 +13,10 @@ class Video extends Model
         'user_id'
     ];
 
-    /**
-     * Relación: Un video pertenece a varias playlists.
-     */
+    // Relación con Playlists (muchos a muchos)
     public function playlists()
     {
         return $this->belongsToMany(Playlist::class, 'playlist_video', 'video_id', 'playlist_id');
     }
 }
-
 
