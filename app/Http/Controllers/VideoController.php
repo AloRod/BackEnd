@@ -16,6 +16,7 @@ class VideoController extends Controller
             'description' => 'nullable|string',
         ]);
 
+
         $playlist = Playlist::findOrFail($playlist_id);
 
         $video = new Video();

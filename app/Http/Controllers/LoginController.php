@@ -21,22 +21,24 @@ class LoginController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);  // Returns errors if validation fails
         }
 
+      
+
         // Check if the user exists
         $user = User::where('email', $request->email)->first();
+        
 
         if (!$user) {
             return response()->json(['error' => 'User not registered'], 404);  // Returns an error if the user does not exist
         }
 
-        // Verify if the password is correct
-        if (!Hash::check($request->password, $user->password)) {
-            return response()->json(['error' => 'Incorrect password'], 401);  // Error if the password does not match
-        }
+        
+        $token = $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
 
         // If authentication is successful
         return response()->json([
             'message' => 'Login successful',
-            'user' => $user
+            'user' => $user,
+            'token' => $token
         ], 200);  // Responds with the authenticated user
     }
 }
