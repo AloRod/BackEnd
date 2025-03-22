@@ -78,14 +78,16 @@ Route::middleware('auth:sanctum')->post('/validate-user-pin/{id}', [HomeControll
 //************************* Rutas de gestión de usuarios restringidos ****************
 
 // Obtener todos los usuarios restringidos
-Route::middleware('auth:sanctum')->get('/restricted-users', [RestrictedUserController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/restrictedUsers', [RestrictedUserController::class, 'index']);
+
+// Obtener un usuario restringido por ID
+Route::middleware('auth:sanctum')->get('/restrictedUsers/{id}', [RestrictedUserController::class, 'show']);
 
 // Crear un nuevo usuario restringido
-Route::middleware('auth:sanctum')->post('/restricted-users', [RestrictedUserController::class, 'store']);
+Route::middleware('auth:sanctum')->post('/CreaterestrictedUsers', [RestrictedUserController::class, 'store']);
 
 // Actualizar un usuario restringido
-Route::middleware('auth:sanctum')->put('/restricted-users/{id}', [RestrictedUserController::class, 'update']);
+Route::middleware('auth:sanctum')->put('/updateRestrictedUsers/{id}', [RestrictedUserController::class, 'update']);
 
 // Eliminar un usuario restringido
-Route::middleware('auth:sanctum')->delete('/restricted-users/{id}', [RestrictedUserController::class, 'destroy']);
- 
+Route::middleware('auth:sanctum')->delete('/DeleterestrictedUsers/{id}', [RestrictedUserController::class, 'destroy']);

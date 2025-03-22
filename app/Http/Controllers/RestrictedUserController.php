@@ -1,87 +1,107 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\RestrictedUser;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class RestrictedUserController extends Controller
 {
-    // Obtener todos los usuarios restringidos
+    // Mostrar todos los usuarios restringidos
     public function index()
     {
-        $user = auth()->user();
-
-        // Obtener usuarios restringidos asociados al usuario principal
-        $restrictedUsers = User::where('parent_id', $user->id)->get(['id', 'name', 'avatar']);
-
-        return response()->json($restrictedUsers);
+        $users = RestrictedUser::all();
+        return response()->json($users);
     }
 
+    // Mostrar un usuario restringido por ID
+    public function show($id)
+    {
+        $user = RestrictedUser::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Usuario restringido no encontrado'], 404);
+        }
+
+        return response()->json($user);
+    }
+
+    // Crear un nuevo usuario restringido
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'pin' => 'required|digits:6',
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-    
-        // Crear el usuario restringido
-        $restrictedUser = new User();
-        $restrictedUser->name = $request->name;
-        $restrictedUser->pin = $request->pin;
-    
-        // Subir el avatar
-        if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $restrictedUser->avatar = $path;
-        }
-    
-        $restrictedUser->save();
-    
-        return response()->json([
-            'message' => 'Usuario restringido creado exitosamente.',
-            'user' => $restrictedUser,
-        ], 201);
-    }
-    // Actualizar un usuario restringido
-    public function update(Request $request, $id)
-    {
+        $user_id = auth()->user()->id;
+        // Validación de los campos
         $request->validate([
-            'name' => 'required|string|max:255',
-            'pin' => 'nullable|digits:6', // Solo actualizar el PIN si se proporciona
-            'avatar' => 'required|in:avatar1,avatar2,avatar3',
+            'fullname' => 'required|string|max:255',
+            'pin' => 'required|numeric|digits:6', // Validación para el PIN
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048', // Asegura que el avatar sea una imagen válida
+            'user_id' => 'required|exists:users,id', // Validación para que el user_id exista en la tabla users
         ]);
 
-        $restrictedUser = User::findOrFail($id);
+        // Guardar la imagen del avatar en el directorio 'avatars' dentro de 'storage/app/public'
+        $path = $request->file('avatar')->store('avatars', 'public');
 
-        // Solo el usuario principal puede actualizar los usuarios restringidos
-        if ($restrictedUser->parent_id !== auth()->user()->id) {
-            return response()->json(['error' => 'No autorizado'], 403);
-        }
+        // Crear el nuevo usuario restringido
+        $user = RestrictedUser::create([
+            'fullname' => $request->fullname,
+            'pin' => $request->pin, // Encriptar el PIN
+            'avatar' => $path, // Guardar la ruta del archivo de imagen
+            'user_id' => auth()->id(),
+        ]);
 
-        $restrictedUser->name = $request->name;
-        if ($request->has('pin')) {
-            $restrictedUser->pin = Hash::make($request->pin);
-        }
-        $restrictedUser->avatar = $request->avatar;
-        $restrictedUser->save();
-
-        return response()->json(['message' => 'Usuario restringido actualizado exitosamente']);
+        return response()->json($user, 201);
     }
 
+   // app/Http/Controllers/RestrictedUserController.php
+
+public function update(Request $request, $id)
+{
+    $user = RestrictedUser::find($id);
+
+    if (!$user) {
+        return response()->json(['message' => 'Usuario restringido no encontrado'], 404);
+    }
+
+    // Validaciones
+    $request->validate([
+        'fullname' => 'required|string|max:255',
+        'pin' => 'nullable|numeric|digits:4', // El PIN es opcional al actualizar
+        'avatar' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048', // El avatar es opcional al actualizar
+        'user_id' => 'required|exists:users,id', // Validación de que el user_id existe
+    ]);
+
+    // Solo actualizamos los campos que están presentes en la solicitud
+    if ($request->has('pin')) {
+        $user->pin = bcrypt($request->pin); // Encriptamos el nuevo PIN
+    }
+
+    if ($request->has('avatar')) {
+        $user->avatar = $request->avatar; // Actualizamos el avatar si se envió
+    }
+
+    // Actualizar otros campos
+    $user->fullname = $request->fullname;
+    $user->user_id = $request->user_id;
+
+    // Guardamos los cambios
+    $user->save();
+
+    return response()->json($user, 200);
+}
+
+    
     // Eliminar un usuario restringido
     public function destroy($id)
     {
-        $restrictedUser = User::findOrFail($id);
+        // Buscar el usuario restringido por ID
+        $user = RestrictedUser::find($id);
 
-        // Solo el usuario principal puede eliminar a los usuarios restringidos
-        if ($restrictedUser->parent_id !== auth()->user()->id) {
-            return response()->json(['error' => 'No autorizado'], 403);
+        if (!$user) {
+            return response()->json(['message' => 'Usuario restringido no encontrado'], 404);
         }
 
-        $restrictedUser->delete();
-
-        return response()->json(200);
+        // Eliminar el usuario restringido
+        $user->delete();
+        return response()->json(['message' => 'Usuario restringido eliminado con éxito']);
     }
 }
