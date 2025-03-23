@@ -13,15 +13,15 @@ class HomeController extends Controller
     // Pantalla de inicio
     public function index()
     {
-        $user = Auth::user();
-
         if (!Auth::guard('sanctum')->check()) {
             return response()->json(['error' => 'No autenticado'], 401);
         }
-
+    
+        $user = Auth::user();
+    
         // Obtener usuarios restringidos asociados al administrador
         $restrictedUsers = RestrictedUser::where('user_id', $user->id)->get(['id', 'fullname', 'avatar']);
-
+    
         return response()->json([
             'message' => 'Inicio exitoso',
             'user' => $user,
