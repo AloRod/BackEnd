@@ -39,10 +39,10 @@ Route::post('login', [LoginController::class, 'login'])->name('login');
 //************************* RUTAS DE VIDEO ***********************************
 
 Route::post('/playlists/{playlist_id}/videos', [VideoController::class, 'store']);
-Route::middleware('auth:sanctum')->get('playlists/{playlist_id}/videos', [VideoController::class, 'index']);
-Route::middleware('auth:sanctum')->get('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'show']);
-Route::middleware('auth:sanctum')->put('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'update']);
-Route::middleware('auth:sanctum')->delete('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'destroy']);
+Route::get('playlists/{playlist_id}/videos', [VideoController::class, 'index']);
+Route::get('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'show']);
+Route::put('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'update']);
+Route::delete('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'destroy']);
 
 //************************* RUTAS DE PLAYLIST *******************************
 
@@ -88,4 +88,3 @@ Route::middleware('auth:sanctum')->put('/restricted-users/{id}', [RestrictedUser
 
 // Eliminar un usuario restringido
 Route::middleware('auth:sanctum')->delete('/restricted-users/{id}', [RestrictedUserController::class, 'destroy']);
- 
