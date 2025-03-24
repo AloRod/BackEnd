@@ -16,7 +16,7 @@ class Video extends Model
     // Relación con Playlists (muchos a muchos)
     public function playlists()
     {
-        return $this->belongsToMany(Playlist::class, 'playlist_video', 'video_id', 'playlist_id');
+        return $this->belongsToMany(Playlist::class)->withTimestamps();
     }
 }
 

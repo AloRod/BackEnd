@@ -33,6 +33,7 @@ class PlaylistController extends Controller
             'name' => 'required|string|max:255',
             'admin_id' => 'required|exists:users,id',
             'associated_profiles' => 'nullable|array',
+            'associated_profiles.*' => 'exists:users,id',
         ]);
 
         $playlist = Playlist::create([
@@ -57,6 +58,7 @@ class PlaylistController extends Controller
             'name' => 'required|string|max:255',
             'admin_id' => 'required|exists:users,id',
             'associated_profiles' => 'nullable|array',
+            'associated_profiles.*' => 'exists:users,id'
         ]);
 
         $playlist->update([

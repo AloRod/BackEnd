@@ -14,16 +14,6 @@ Route::post('register', [RegisterController::class, "register"]);
 // Ruta login
 Route::post('login', [LoginController::class, "login"]);
 
-// ************************ VIDEO ************************
-
-Route::post('playlists/{playlist_id}/videos', [VideoController::class, 'store']);
-Route::get('playlists/{playlist_id}/videos', [VideoController::class, 'index']);
-Route::get('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'show']);
-Route::put('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'update']);
-Route::delete('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'destroy']);
-
-// ******************* PLAYLIST *****************
-
 //************************* RUTAS DE REGISTRO Y LOGIN ***********************
 
 // Ruta registro
@@ -37,31 +27,31 @@ Route::post('login', [LoginController::class, 'login'])->name('login');
 
 
 //************************* RUTAS DE VIDEO ***********************************
+// Ruta para crear un video dentro de una playlist
+Route::middleware('auth:sanctum')->post('/playlists/{playlist_id}/videos', [VideoController::class, 'store']);
 
-Route::post('/playlists/{playlist_id}/videos', [VideoController::class, 'store']);
-Route::get('playlists/{playlist_id}/videos', [VideoController::class, 'index']);
-Route::get('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'show']);
-Route::put('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'update']);
-Route::delete('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'destroy']);
+// Otras rutas de videos (con autenticación)
+Route::middleware('auth:sanctum')->get('playlists/{playlist_id}/videos', [VideoController::class, 'index']);
+Route::middleware('auth:sanctum')->get('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'show']);
+Route::middleware('auth:sanctum')->put('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'update']);
+Route::middleware('auth:sanctum')->delete('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'destroy']);
 
 //************************* RUTAS DE PLAYLIST *******************************
 
-
 // Ruta para crear una playlist
-Route::post('/playlists', [PlaylistController::class, 'store']);
+Route::middleware('auth:sanctum')->post('/playlists', [PlaylistController::class, 'store']);
 
 // Obtener todas las Playlists
-Route::get('/playlists', [PlaylistController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/playlists', [PlaylistController::class, 'index']);
 
 // Obtener una Playlist específica
-Route::get('/playlists/{id}', [PlaylistController::class, 'show']);
+Route::middleware('auth:sanctum')->get('/playlists/{id}', [PlaylistController::class, 'show']);
 
 // Actualizar una Playlist
-Route::put('/playlists/{id}', [PlaylistController::class, 'update']);
+Route::middleware('auth:sanctum')->put('/playlists/{id}', [PlaylistController::class, 'update']);
 
 // Eliminar una Playlist
-Route::delete('/playlists/{id}', [PlaylistController::class, 'destroy']);
-
+Route::middleware('auth:sanctum')->delete('/playlists/{id}', [PlaylistController::class, 'destroy']);
 
 //************************* RUTAS DE USUARIO Y VALIDACIÓN DE PIN ****************
 

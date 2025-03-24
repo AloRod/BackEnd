@@ -8,29 +8,31 @@ use Illuminate\Http\Request;
 class VideoController extends Controller
 {
     public function store($playlist_id, Request $request)
-    {
-        // Validación de los datos de entrada
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'url' => 'required|url',
-            'description' => 'nullable|string',
-        ]);
+{
+    // Validación de los datos de entrada
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'url' => 'required|url',
+        'description' => 'nullable|string',
+        'user_id' => 'required|exists:users,id', // ID del usuario que crea el video
+    ]);
 
+    // Buscar la playlist por ID
+    $playlist = Playlist::findOrFail($playlist_id);
 
-        $playlist = Playlist::findOrFail($playlist_id);
+    // Crear el video
+    $video = Video::create([
+        'name' => $request->input('name'),
+        'url' => $request->input('url'),
+        'description' => $request->input('description'),
+        'user_id' => $request->input('user_id'),
+    ]);
 
-        $video = new Video();
-        $video->name = $request->input('name');
-        $video->url = $request->input('url');
-        $video->description = $request->input('description');
-        $video->user_id = $request->input('user_id');
-        $video->save();
+    // Asociar el video con la playlist
+    $video->playlists()->attach($playlist->id);
 
-        // Relacionar el video con la playlist
-        $video->playlists()->attach($playlist->id);
-
-        return response()->json($video, 201);
-    }
+    return response()->json($video, 201); // Devolver el video creado
+}
 
     public function index($playlist_id)
     {

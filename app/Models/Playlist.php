@@ -8,7 +8,13 @@ class Playlist extends Model
 {
     protected $fillable = [
         'name',
-        'description',
+        'admin_id',
+        'associated_profiles',
+    ];
+
+    // Convierte automáticamente el campo associated_profiles a un array
+    protected $casts = [
+        'associated_profiles' => 'array',
     ];
 
     // Relación con Videos
@@ -17,5 +23,4 @@ class Playlist extends Model
         return $this->belongsToMany(Video::class, 'playlist_video', 'playlist_id', 'video_id');
     }
 }
-
 
