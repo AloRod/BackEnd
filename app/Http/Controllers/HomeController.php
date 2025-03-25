@@ -20,7 +20,17 @@ class HomeController extends Controller
         $user = Auth::user();
     
         // Obtener usuarios restringidos asociados al administrador
-        $restrictedUsers = RestrictedUser::where('user_id', $user->id)->get(['id', 'fullname', 'avatar']);
+        $restrictedUsers = RestrictedUser::where('user_id', $user->id)->get([
+            'id',
+            'fullname',
+            'avatar'
+        ]);
+    
+        // Agregar la propiedad avatar_url a cada usuario
+        $restrictedUsers->transform(function ($user) {
+            $user->avatar_url = $user->avatar ? asset('storage/' . $user->avatar) : null;
+            return $user;
+        });
     
         return response()->json([
             'message' => 'Inicio exitoso',

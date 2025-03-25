@@ -80,4 +80,4 @@ Route::middleware('auth:sanctum')->post('/CreaterestrictedUsers', [RestrictedUse
 Route::middleware('auth:sanctum')->put('/updateRestrictedUsers/{id}', [RestrictedUserController::class, 'update']);
 
 // Eliminar un usuario restringido
-Route::middleware('auth:sanctum')->delete('/restricted-users/{id}', [RestrictedUserController::class, 'destroy']);
+Route::middleware('auth:sanctum')->delete('/DeleteUserRestricted/{id}', [RestrictedUserController::class, 'destroy']);

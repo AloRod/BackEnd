@@ -20,6 +20,13 @@ class RestrictedUser extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function getAvatarUrlAttribute()
+{
+    if ($this->avatar) {
+        return asset('storage/' . $this->avatar);
+    }
+    return null;
+}
     /**
      * Get playlists where this restricted user is associated.
      */
