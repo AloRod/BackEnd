@@ -62,7 +62,7 @@ Route::middleware('auth:sanctum')->get('/user', [HomeController::class, 'index']
 Route::middleware('auth:sanctum')->post('/validateAdminPin', [HomeController::class, 'validateAdminPin']);
 
 // Validar PIN del usuario restringido
-Route::middleware('auth:sanctum')->post('/validate-user-pin/{id}', [HomeController::class, 'validateRestrictedUserPin']);
+Route::middleware('auth:sanctum')->post('/validateUserPin/{id}', [HomeController::class, 'validateRestrictedUserPin']);
 
 
 //************************* Rutas de gestión de usuarios restringidos ****************
@@ -77,7 +77,7 @@ Route::middleware('auth:sanctum')->get('/restrictedUsers/{id}', [RestrictedUserC
 Route::middleware('auth:sanctum')->post('/CreaterestrictedUsers', [RestrictedUserController::class, 'store']);
 
 // Actualizar un usuario restringido
-Route::middleware('auth:sanctum')->put('/updateRestrictedUsers/{id}', [RestrictedUserController::class, 'update']);
+Route::middleware('auth:sanctum')->post('/updateRestrictedUsers/{id}', [RestrictedUserController::class, 'update']);
 
 // Eliminar un usuario restringido
 Route::middleware('auth:sanctum')->delete('/DeleteUserRestricted/{id}', [RestrictedUserController::class, 'destroy']);

@@ -2,139 +2,123 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateRestrictedUserRequest;
 use App\Models\RestrictedUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class RestrictedUserController extends Controller
 {
-    // Mostrar todos los usuarios restringidos
+    // Display all restricted users
     public function index()
     {
         $users = RestrictedUser::all();
 
-        // Generar la URL completa para cada avatar
+        // Generate the full URL for each avatar
         $users = $users->map(function ($user) {
             $user->avatar_url = asset('storage/' . $user->avatar);
             return $user;
         });
-    
+
         return response()->json($users);
     }
 
-    // Mostrar un usuario restringido por ID
+    // Show a restricted user by ID
     public function show($id)
     {
         $user = RestrictedUser::findOrFail($id);
         return response()->json($user);
     }
 
-    // Crear un nuevo usuario restringido
+    // Create a new restricted user
     public function store(Request $request)
     {
-        // Validación de los campos
-    $request->validate([
-        'fullname' => 'required|string|max:255',
-        'pin' => 'required|numeric|digits:6', // El PIN debe ser de 6 dígitos
-        'avatar' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048', // Validación del avatar
-    ]);
+        // Validate fields
+        $request->validate([
+            'fullname' => 'required|string|max:255',
+            'pin' => 'required|numeric|digits:6', // PIN must be 6 digits
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048', // Avatar validation
+        ]);
 
-    // Guardar la imagen del avatar en 'storage/app/public/avatars'
-    $path = $request->file('avatar')->store('avatars', 'public');
+        // Store the avatar image in 'storage/app/public/avatars'
+        $path = $request->file('avatar')->store('avatars', 'public');
 
-    // Crear el usuario restringido
-    $user = RestrictedUser::create([
-        'fullname' => $request->fullname,
-        'pin' => $request->pin, // Almacenar el PIN directamente como número entero
-        'avatar' => $path, // Ruta del avatar
-        'user_id' => auth()->id(), // Asignar el usuario autenticado
-    ]);
+        // Create the restricted user
+        $user = RestrictedUser::create([
+            'fullname' => $request->fullname,
+            'pin' => $request->pin, // Store PIN directly as an integer
+            'avatar' => $path, // Avatar path
+            'user_id' => auth()->id(), // Assign the authenticated user
+        ]);
 
-    return response()->json([
-        'message' => 'Usuario restringido creado con éxito',
-        'user' => $user
-    ], 201);
+        return response()->json([
+            'message' => 'Restricted user successfully created',
+            'user' => $user
+        ], 201);
     }
 
+    // Update a restricted user
     public function update(Request $request, $id)
     {
         try {
-            // Buscar el usuario
-            $user = RestrictedUser::findOrFail($id);
-            \Log::info('Usuario encontrado:', $user->toArray());
-    
-            // Logs para depuración
-            \Log::info('Datos recibidos:', $request->all());
-            \Log::info('Archivo avatar recibido:', ['avatar' => $request->file('avatar')]);
-    
-            // Validar los datos recibidos
-            $validatedData = $request->validate([
-                'fullname' => 'nullable|string|max:255',
-                'pin' => 'nullable|numeric|digits:6',
-                'avatar' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            // Find the restricted user
+            $user = RestrictedUser::find($id);
+
+            // Check if the user exists
+            if (!$user) {
+                return response()->json(['message' => 'Restricted user not found'], 404);
+            }
+
+            // Update user data
+            $user->update([
+                'fullname' => $request->fullname,
+                'pin' => $request->pin,
             ]);
-            \Log::info('Datos validados:', $validatedData);
-    
-            // Preparar los datos para actualizar
-            $dataToUpdate = [];
-    
-            if ($request->filled('fullname')) {
-                $dataToUpdate['fullname'] = $request->input('fullname');
-            }
-    
-            if ($request->filled('pin')) {
-                $dataToUpdate['pin'] = $request->input('pin');
-            }
-    
+
+            // Handle avatar update (if provided)
             if ($request->hasFile('avatar')) {
-                \Log::info('Avatar presente:', ['hasFile' => $request->hasFile('avatar')]);
-    
-                // Eliminar la imagen anterior si existe
+                // Delete the previous image if it exists
                 if ($user->avatar) {
                     Storage::disk('public')->delete($user->avatar);
                 }
-    
-                // Guardar la nueva imagen
+
+                // Store the new image
                 $path = $request->file('avatar')->store('avatars', 'public');
-                \Log::info('Nueva imagen guardada:', ['path' => $path]);
-                $dataToUpdate['avatar'] = $path;
+                $user->avatar = $path;
+                $user->save();
             }
-    
-            \Log::info('Datos a actualizar:', $dataToUpdate);
-    
-            // Actualizar los datos
-            $updated = $user->update($dataToUpdate);
-            \Log::info('Resultado de la actualización:', ['updated' => $updated]);
-    
-            if (!$updated) {
-                throw new \Exception('No se pudieron guardar los cambios en la base de datos.');
-            }
-    
+
+            // Return JSON response with the updated user
             return response()->json([
-                'message' => 'Usuario restringido actualizado con éxito',
+                'message' => 'Restricted user successfully updated',
                 'user' => $user,
             ], 200);
+
         } catch (\Exception $e) {
-            \Log::error('Error al actualizar el usuario:', ['error' => $e->getMessage()]);
+            // Log the error
+            \Log::error('Error updating restricted user:', ['error' => $e->getMessage()]);
+
+            // Return JSON response with the error message
             return response()->json([
-                'message' => 'Hubo un error al actualizar el usuario restringido.',
+                'message' => 'An error occurred while updating the restricted user.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
-    // Eliminar un usuario restringido
+
+    // Delete a restricted user
     public function destroy($id)
     {
         $user = RestrictedUser::findOrFail($id);
 
-        // Eliminar la imagen asociada si existe
+        // Delete the associated image if it exists
         if ($user->avatar) {
             Storage::disk('public')->delete($user->avatar);
         }
 
-        // Eliminar el usuario
+        // Delete the user
         $user->delete();
 
-        return response()->json(['message' => 'Usuario restringido eliminado con éxito'], 200);
+        return response()->json(['message' => 'Restricted user successfully deleted'], 200);
     }
 }

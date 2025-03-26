@@ -7,26 +7,26 @@ use Illuminate\Http\Request;
 
 class PlaylistController extends Controller
 {
-    // Mostrar todas las playlists
+    // Display all playlists
     public function index()
     {
         $playlists = Playlist::all();
         return response()->json($playlists);
     }
 
-    // Mostrar una playlist por ID
+    // Show a playlist by ID
     public function show($id)
     {
         $playlist = Playlist::find($id);
 
         if (!$playlist) {
-            return response()->json(['message' => 'Playlist no encontrada'], 404);
+            return response()->json(['message' => 'Playlist not found'], 404);
         }
 
         return response()->json($playlist);
     }
 
-    // Crear una nueva playlist
+    // Create a new playlist
     public function store(Request $request)
     {
         $request->validate([
@@ -45,13 +45,13 @@ class PlaylistController extends Controller
         return response()->json($playlist, 201);
     }
 
-    // Actualizar una playlist existente
+    // Update an existing playlist
     public function update(Request $request, $id)
     {
         $playlist = Playlist::find($id);
 
         if (!$playlist) {
-            return response()->json(['message' => 'Playlist no encontrada'], 404);
+            return response()->json(['message' => 'Playlist not found'], 404);
         }
 
         $request->validate([
@@ -70,16 +70,16 @@ class PlaylistController extends Controller
         return response()->json($playlist);
     }
 
-    // Eliminar una playlist
+    // Delete a playlist
     public function destroy($id)
     {
         $playlist = Playlist::find($id);
 
         if (!$playlist) {
-            return response()->json(['message' => 'Playlist no encontrada'], 404);
+            return response()->json(['message' => 'Playlist not found'], 404);
         }
 
         $playlist->delete();
-        return response()->json(['message' => 'Playlist eliminada con éxito']);
+        return response()->json(['message' => 'Playlist successfully deleted']);
     }
 }

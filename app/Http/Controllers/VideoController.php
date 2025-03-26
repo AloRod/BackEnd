@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Playlist;
@@ -8,36 +9,36 @@ use Illuminate\Http\Request;
 class VideoController extends Controller
 {
     public function store($playlist_id, Request $request)
-{
-    // Validación de los datos de entrada
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'url' => 'required|url',
-        'description' => 'nullable|string',
-        'user_id' => 'required|exists:users,id', // ID del usuario que crea el video
-    ]);
+    {
+        // Input validation
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'url' => 'required|url',
+            'description' => 'nullable|string',
+            'user_id' => 'required|exists:users,id', // ID of the user creating the video
+        ]);
 
-    // Buscar la playlist por ID
-    $playlist = Playlist::findOrFail($playlist_id);
+        // Find the playlist by ID
+        $playlist = Playlist::findOrFail($playlist_id);
 
-    // Crear el video
-    $video = Video::create([
-        'name' => $request->input('name'),
-        'url' => $request->input('url'),
-        'description' => $request->input('description'),
-        'user_id' => $request->input('user_id'),
-    ]);
+        // Create the video
+        $video = Video::create([
+            'name' => $request->input('name'),
+            'url' => $request->input('url'),
+            'description' => $request->input('description'),
+            'user_id' => $request->input('user_id'),
+        ]);
 
-    // Asociar el video con la playlist
-    $video->playlists()->attach($playlist->id);
+        // Associate the video with the playlist
+        $video->playlists()->attach($playlist->id);
 
-    return response()->json($video, 201); // Devolver el video creado
-}
+        return response()->json($video, 201); // Return the created video
+    }
 
     public function index($playlist_id)
     {
         $playlist = Playlist::findOrFail($playlist_id);
-        $videos = $playlist->videos; // Relación definida en el modelo Playlist
+        $videos = $playlist->videos; // Relationship defined in the Playlist model
 
         return response()->json($videos);
     }

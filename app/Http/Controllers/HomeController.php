@@ -10,66 +10,80 @@ use Illuminate\Support\Facades\Hash;
 
 class HomeController extends Controller
 {
-    // Pantalla de inicio
+    // Home screen
     public function index()
     {
         if (!Auth::guard('sanctum')->check()) {
-            return response()->json(['error' => 'No autenticado'], 401);
+            return response()->json(['error' => 'Not authenticated'], 401);
         }
     
         $user = Auth::user();
     
-        // Obtener usuarios restringidos asociados al administrador
+        // Get restricted users associated with the administrator
         $restrictedUsers = RestrictedUser::where('user_id', $user->id)->get([
             'id',
             'fullname',
             'avatar'
         ]);
     
-        // Agregar la propiedad avatar_url a cada usuario
+        // Add the avatar_url property to each user
         $restrictedUsers->transform(function ($user) {
             $user->avatar_url = $user->avatar ? asset('storage/' . $user->avatar) : null;
             return $user;
         });
     
         return response()->json([
-            'message' => 'Inicio exitoso',
+            'message' => 'Successful login',
             'user' => $user,
             'restricted_users' => $restrictedUsers
         ]);
     }
 
-    // Validar PIN para ingresar a la administración
+    // Validate PIN for admin access
     public function validateAdminPin(Request $request)
     {
-        // Verificar si el usuario está autenticado
+        // Check if the user is authenticated
         $user = Auth::user();
         if (!$user) {
-            return response()->json(['error' => 'No autenticado'], 401);
+            return response()->json(['error' => 'Not authenticated'], 401);
         }
     
-        // Verificar si el PIN está presente en la solicitud
+        // Check if the PIN is present in the request
         if (!$request->has('pin')) {
-            return response()->json(['error' => 'El PIN es obligatorio'], 400);
+            return response()->json(['error' => 'PIN is required'], 400);
         }
     
-        // Verificar si el PIN es correcto
+        // Check if the PIN is correct
         if (!hash_equals($user->pin, $request->pin)) {
-            return response()->json(['error' => 'PIN incorrecto'], 403);
+            return response()->json(['error' => 'Incorrect PIN'], 403);
         }
     
-        return response()->json(['message' => 'Acceso permitido a administración'], 200);
+        return response()->json(['message' => 'Access granted to administration'], 200);
     }
 
-    //Validar PIN del usuario restringido para ver playlist
+    // Validate restricted user's PIN to view playlist
     public function validateRestrictedUserPin(Request $request, $id)
     {
+        // Check if the restricted user exists
         $restrictedUser = RestrictedUser::find($id);
-
-        if (!$restrictedUser || !Hash::check($request->pin, $restrictedUser->pin)) {
-            return response()->json(['error' => 'PIN incorrecto'], 403);
+        if (!$restrictedUser) {
+            return response()->json(['error' => 'Restricted user not found'], 404);
         }
-
-        return response()->json(['message' => 'Acceso permitido a playlist', 'user' => $restrictedUser]);
+    
+        // Check if the PIN is present in the request
+        if (!$request->has('pin')) {
+            return response()->json(['error' => 'PIN is required'], 400);
+        }
+    
+        // Check if the PIN is correct
+        if (!hash_equals($restrictedUser->pin, $request->pin)) {
+            return response()->json(['error' => 'Incorrect PIN'], 403);
+        }
+    
+        // If everything is correct, return access granted
+        return response()->json([
+            'message' => 'Access granted to user',
+            'user' => $restrictedUser,
+        ], 200);
     }
 }
