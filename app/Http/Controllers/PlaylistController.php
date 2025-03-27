@@ -30,10 +30,11 @@ class PlaylistController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'admin_id' => 'required|exists:users,id',
-            'associated_profiles' => 'nullable|array',
-            'associated_profiles.*' => 'exists:users,id',
+            'name' => 'required|string|min:3',
+    'description' => 'nullable|string',
+    'user_id' => 'required|integer',
+    'admin_id' => 'required|integer',
+    'associated_profiles' => 'array',
         ]);
 
         $playlist = Playlist::create([
@@ -55,10 +56,11 @@ class PlaylistController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'admin_id' => 'required|exists:users,id',
-            'associated_profiles' => 'nullable|array',
-            'associated_profiles.*' => 'exists:users,id'
+            'name' => 'required|string|min:3',
+            'description' => 'nullable|string',
+            'user_id' => 'required|integer',
+            'admin_id' => 'required|integer',
+            'associated_profiles' => 'array',
         ]);
 
         $playlist->update([
@@ -82,4 +84,18 @@ class PlaylistController extends Controller
         $playlist->delete();
         return response()->json(['message' => 'Playlist successfully deleted']);
     }
+    public function getUserPlaylists($id)
+{
+   // Convertir el ID del usuario en un array JSON
+   $userIdArray = json_encode([$id]);
+
+   // Buscar playlists usando Eloquent y JSONB
+   $playlists = Playlist::whereJsonContains('associated_profiles', [$id])->get();
+
+   if ($playlists->isEmpty()) {
+       return response()->json(['message' => 'No playlists found for this user'], 404);
+   }
+
+   return response()->json($playlists);
+}
 }

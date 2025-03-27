@@ -52,6 +52,7 @@ Route::middleware('auth:sanctum')->put('/playlists/{id}', [PlaylistController::c
 
 // Eliminar una Playlist
 Route::middleware('auth:sanctum')->delete('/playlists/{id}', [PlaylistController::class, 'destroy']);
+Route::middleware('auth:sanctum')->get('/users/{id}/playlists', [PlaylistController::class, 'getUserPlaylists']);
 
 //************************* RUTAS DE USUARIO Y VALIDACIÓN DE PIN ****************
 
