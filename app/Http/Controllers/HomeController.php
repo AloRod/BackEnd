@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Playlist;
 use App\Models\User;
 use App\Models\RestrictedUser;
 use Illuminate\Http\Request;
@@ -62,28 +63,39 @@ class HomeController extends Controller
     }
 
     // Validate restricted user's PIN to view playlist
-    public function validateRestrictedUserPin(Request $request, $id)
+    public function validateRestrictedUserPin(Request $request)
     {
-        // Check if the restricted user exists
-        $restrictedUser = RestrictedUser::find($id);
-        if (!$restrictedUser) {
-            return response()->json(['error' => 'Restricted user not found'], 404);
-        }
+        // Validar que el PIN esté presente en la solicitud
+        $request->validate([
+            'pin' => 'required|string', // Asegúrate de que el PIN sea una cadena
+        ]);
     
-        // Check if the PIN is present in the request
-        if (!$request->has('pin')) {
-            return response()->json(['error' => 'PIN is required'], 400);
-        }
+        // Buscar al usuario restringido por su PIN
+        $user = RestrictedUser::where('pin', $request->pin)->first();
     
-        // Check if the PIN is correct
-        if (!hash_equals($restrictedUser->pin, $request->pin)) {
+        if (!$user) {
             return response()->json(['error' => 'Incorrect PIN'], 403);
         }
     
-        // If everything is correct, return access granted
+        // Obtener las playlists asociadas al usuario usando whereJsonContains
+        $playlists = Playlist::whereJsonContains('associated_profiles', $user->id)
+            ->withCount('videos') // Contar los videos asociados a cada playlist
+            ->get()
+            ->map(function ($playlist) {
+                return [
+                    'id' => $playlist->id,
+                    'name' => $playlist->name,
+                    'video_count' => $playlist->videos_count,
+                ];
+            });
+    
         return response()->json([
-            'message' => 'Access granted to user',
-            'user' => $restrictedUser,
+            'message' => 'Access granted',
+            'user' => [
+                'id' => $user->id,
+                'fullname' => $user->fullname,
+            ],
+            'playlists' => $playlists,
         ], 200);
     }
 }

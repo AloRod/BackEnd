@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('admin_id')->constrained('users')->onDelete('cascade');
-            $table->json('associated_profiles')->nullable();           
+           $table->foreignId('associated_profiles')->constrained('restricted_users')->onDelete('cascade');          
             $table->timestamps();
         });
+
+     
     }
 
     /**

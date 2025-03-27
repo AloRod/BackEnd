@@ -63,7 +63,7 @@ Route::middleware('auth:sanctum')->get('/user', [HomeController::class, 'index']
 Route::middleware('auth:sanctum')->post('/validateAdminPin', [HomeController::class, 'validateAdminPin']);
 
 // Validar PIN del usuario restringido
-Route::middleware('auth:sanctum')->post('/validateUserPin/{id}', [HomeController::class, 'validateRestrictedUserPin']);
+Route::middleware('auth:sanctum')->post('/validateRestrictedUserPin/{id}', [HomeController::class, 'validateRestrictedUserPin']);
 
 
 //************************* Rutas de gestión de usuarios restringidos ****************

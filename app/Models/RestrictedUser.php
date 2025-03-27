@@ -34,4 +34,5 @@ class RestrictedUser extends Model
     {
         return Playlist::whereJsonContains('associated_profiles', $this->id)->get();
     }
+    
 }

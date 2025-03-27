@@ -22,5 +22,6 @@ class Playlist extends Model
     {
         return $this->belongsToMany(Video::class, 'playlist_video', 'playlist_id', 'video_id');
     }
+    
 }
 
