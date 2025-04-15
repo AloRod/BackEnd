@@ -33,6 +33,13 @@ class LoginController extends Controller
             return response()->json(['error' => 'Invalid credentials'], 401);  // If the password doesn't match
         }
 
+        if (!$user->status == 'pending') {
+            return response()->json(
+                ['error' => 'Your account is not yet active. Please check your email and follow the instructions to activate it.', 'data' => $user],
+                403
+            );
+        }
+
         // Create a token for the user
         $token = $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
 

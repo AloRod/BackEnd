@@ -1,14 +1,17 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         // Validations
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:users',
@@ -19,6 +22,7 @@ class RegisterController extends Controller
             'name' => 'required',
             'lastname' => 'required',
             'birthdate' => 'required|date',
+            'country' => 'required', 
         ]);
 
         if ($validator->fails()) {
@@ -34,6 +38,8 @@ class RegisterController extends Controller
             return response()->json(['error' => 'You must be over 18 years old'], 403);
         }
 
+        
+
         // Create user
         $user = User::create([
             'email' => $request->email,
@@ -44,10 +50,13 @@ class RegisterController extends Controller
             'lastname' => $request->lastname,
             'country' => $request->country,
             'birthdate' => $request->birthdate,
-            'status' => $request->status ?? 'pending',
-            'verification_token' => bin2hex(random_bytes(16)),
+            'status' => 'pending', // Estado inicial siempre "pending"
         ]);
 
+        event(new Registered($user));
+
         return response()->json(['message' => 'Registration successful', 'user' => $user], 201);
+
     }
+
 }

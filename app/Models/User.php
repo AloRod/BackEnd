@@ -2,23 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Sanctum\HasApiTokens; 
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use App\Notifications\VerifyEmailNotification;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, MustVerifyEmailTrait;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<string>
-     */
     protected $fillable = [
         'email',
         'password',
@@ -32,21 +27,11 @@ class User extends Authenticatable
         'verification_token'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -56,30 +41,23 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Relación con el usuario principal (para cuentas restringidas).
-     */
-   /**
-     * Get the restricted users associated with the user.
-     */
     public function restrictedUsers()
     {
         return $this->hasMany(RestrictedUser::class);
     }
 
-    /**
-     * Get the playlists administered by the user.
-     */
     public function playlists()
     {
         return $this->hasMany(Playlist::class, 'admin_id');
     }
 
-    /**
-     * Get the videos that belong to the user.
-     */
     public function videos()
     {
         return $this->hasMany(Video::class);
+    }
+    // notifications correo de verificación. 
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailNotification());
     }
 }

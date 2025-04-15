@@ -7,20 +7,18 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RestrictedUserController;
+use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\GoogleAuthController;
 
-// Ruta registro
-Route::post('register', [RegisterController::class, "register"]);
 
-// Ruta login
-Route::post('login', [LoginController::class, "login"]);
+
+
 
 //************************* RUTAS DE REGISTRO Y LOGIN ***********************
 
 // Ruta registro
-Route::post('register', [
-    RegisterController::class,
-    "register"
-]);
+Route::post('register', [RegisterController::class,"register"]);
+
 
 // Ruta login
 Route::post('login', [LoginController::class, 'login'])->name('login');
@@ -82,3 +80,14 @@ Route::middleware('auth:sanctum')->post('/updateRestrictedUsers/{id}', [Restrict
 
 // Eliminar un usuario restringido
 Route::middleware('auth:sanctum')->delete('/DeleteUserRestricted/{id}', [RestrictedUserController::class, 'destroy']);
+
+
+//*************************Verificar la cuenta con el correo******************************
+Route::middleware([])->group(function () {
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->name('verification.verify');
+});
+
+//*************************Google******************************
+Route::post('/check-google-user', [GoogleAuthController::class, "handleGoogleAuth"]);
+Route::post('/complete-google-profile', [GoogleAuthController::class, "completeGoogleProfile"]);
