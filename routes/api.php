@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RestrictedUserController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Services\TwoFactorAuthService;
 
 
 
@@ -91,3 +92,4 @@ Route::middleware([])->group(function () {
 //*************************Google******************************
 Route::post('/check-google-user', [GoogleAuthController::class, "handleGoogleAuth"]);
 Route::post('/complete-google-profile', [GoogleAuthController::class, "completeGoogleProfile"]);
+Route::post('/verify-sms', [TwoFactorAuthService::class, 'verifyCode']);
