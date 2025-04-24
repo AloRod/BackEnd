@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use App\Services\TwoFactorAuthService;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginController extends Controller
 {
@@ -48,13 +49,14 @@ class LoginController extends Controller
         }
 
         // Create a token for the user
-        $token = $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
+        $token = JWTAuth::fromUser($user);
         if ($user->phone) {
 
             $verificationCode = $this->tfaService->generateVerificationCode();
 
             Cache::put('sms_code_' . $user->id, $verificationCode, now()->addMinutes(10));
 
+            \Log::info("SMS verification: $verificationCode");
             $this->tfaService->sendSmsVerification($user->phone, $verificationCode);
         }
 
@@ -66,6 +68,7 @@ class LoginController extends Controller
                 'name' => $user->name,
             ],
             'token' => $token,
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
             'requires_verification' => true
         ], 200);
     }

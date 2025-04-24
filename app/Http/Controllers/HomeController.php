@@ -15,11 +15,11 @@ class HomeController extends Controller
     // Home screen
     public function index()
     {
-        if (!Auth::guard('sanctum')->check()) {
+        if (!Auth::guard('api')->check()) {
             return response()->json(['error' => 'Not authenticated'], 401);
         }
 
-        $user = Auth::user();
+        $user = auth('api')->user();
 
         // Get restricted users associated with the administrator
         $restrictedUsers = RestrictedUser::where('user_id', $user->id)->get([
@@ -45,7 +45,7 @@ class HomeController extends Controller
     public function validateAdminPin(Request $request)
     {
         // Check if the user is authenticated
-        $user = Auth::user();
+        $user = auth('api')->user();
         if (!$user) {
             return response()->json(['error' => 'Not authenticated'], 401);
         }

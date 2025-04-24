@@ -24,10 +24,10 @@ class GoogleAuthController extends Controller
 
     private function generateToken($user)
     {
-        return $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
+        return JWTAuth::fromUser($user);
     }
 
-//funcion para buscar si el usuario existe o no 
+//funcion para buscar si el usuario existe o no
     public function handleGoogleAuth(Request $request)
     {
         // Validations
@@ -49,7 +49,7 @@ class GoogleAuthController extends Controller
             // Generate token and return user data
             $token = $this->generateToken($googleUser);
 
-            $needs_completion = $user ? $user->status == 'pending' : true; //identifica si es un usuario nuevo 
+            $needs_completion = $user ? $user->status == 'pending' : true; //identifica si es un usuario nuevo
 
             return response()->json([
                 'message' => 'Welcome',
@@ -59,7 +59,8 @@ class GoogleAuthController extends Controller
                     'name' => $googleUser->name,
                 ],
                 'token' => $token,
-                'needs_completion' => $needs_completion
+                'needs_completion' => $needs_completion,
+                'expires_in' => auth('api')->factory()->getTTL() * 60
             ], 200);
 
         } catch (\Exception $e) {
@@ -95,7 +96,7 @@ class GoogleAuthController extends Controller
 
         // Create the user
 
-        $user = Auth::user();
+        $user = auth('api')->user();
 
         $user->update([
             'name' => $request->name,
