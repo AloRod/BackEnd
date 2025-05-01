@@ -6,10 +6,71 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Auth\Events\Registered;
+use App\Services\MailtrapService;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
+    protected $mailtrapService;
+
+    public function __construct(MailtrapService $mailtrapService)
+    {
+        $this->mailtrapService = $mailtrapService;
+    }
+    private function getVerificationURL($user)
+    {
+        if (!method_exists($user, 'getEmailForVerification')) {
+            Log::warning('User model does not have getEmailForVerification method. Falling back to ->email.');
+            $emailForVerification = $user->email;
+        } else {
+            $emailForVerification = $user->getEmailForVerification();
+        }
+
+        $backendVerificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
+            [
+                'id' => $user->getKey(),
+                'hash' => sha1($emailForVerification),
+            ]
+        );
+
+
+        $frontendUrl = config('app.frontend_url');
+        if (!$frontendUrl) {
+            Log::error('Frontend URL (APP_FRONTEND_URL) is not configured.');
+            return response()->json(['message' => 'Registration successful, but verification email could not be prepared (frontend URL missing).', 'user' => $user], 201);
+        }
+        return rtrim($frontendUrl, '/') . '/verify-email' . '?verify_url=' . urlencode($backendVerificationUrl);
+    }
+
+    private function sendVerificationEmail($user)
+    {
+        try {
+            $fullVerificationUrl = $this->getVerificationURL($user);
+
+            $emailSent = $this->mailtrapService->sendVerificationEmail(
+                $user->email,
+                $user->name,
+                $fullVerificationUrl
+            );
+
+            if (!$emailSent) {
+                Log::error('Mailtrap verification email failed to send for user.', ['user_id' => $user->id, 'email' => $user->email]);
+                return response()->json(['message' => 'Registration successful, but failed to send verification email.', 'user' => $user], 207);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Error generating verification URL or sending email.', [
+                'user_id' => $user->id,
+                'exception' => $e->getMessage(),
+            ]);
+            return response()->json(['message' => 'Registration successful, but an error occurred while sending the verification email.', 'user' => $user], 201);
+        }
+    }
     public function register(Request $request)
     {
         // Validations
@@ -53,7 +114,7 @@ class RegisterController extends Controller
             'status' => 'pending', // Estado inicial siempre "pending"
         ]);
 
-        event(new Registered($user));
+        $this->sendVerificationEmail($user);
 
         return response()->json(['message' => 'Registration successful', 'user' => $user], 201);
 

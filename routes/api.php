@@ -27,60 +27,60 @@ Route::post('login', [LoginController::class, 'login'])->name('login');
 
 //************************* RUTAS DE VIDEO ***********************************
 // Ruta para crear un video dentro de una playlist
-Route::middleware('auth:sanctum')->post('/playlists/{playlist_id}/videos', [VideoController::class, 'store']);
+Route::middleware('auth:api')->post('/playlists/{playlist_id}/videos', [VideoController::class, 'store']);
 
 // Otras rutas de videos (con autenticación)
-Route::middleware('auth:sanctum')->get('playlists/{playlist_id}/videos', [VideoController::class, 'index']);
-Route::middleware('auth:sanctum')->get('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'show']);
-Route::middleware('auth:sanctum')->put('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'update']);
-Route::middleware('auth:sanctum')->delete('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'destroy']);
+Route::middleware('auth:api')->get('playlists/{playlist_id}/videos', [VideoController::class, 'index']);
+Route::middleware('auth:api')->get('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'show']);
+Route::middleware('auth:api')->put('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'update']);
+Route::middleware('auth:api')->delete('playlists/{playlist_id}/videos/{video_id}', [VideoController::class, 'destroy']);
 
 //************************* RUTAS DE PLAYLIST *******************************
 
 // Ruta para crear una playlist
-Route::middleware('auth:sanctum')->post('/playlists', [PlaylistController::class, 'store']);
+Route::middleware('auth:api')->post('/playlists', [PlaylistController::class, 'store']);
 
 // Obtener todas las Playlists
-Route::middleware('auth:sanctum')->get('/playlists', [PlaylistController::class, 'index']);
+Route::middleware('auth:api')->get('/playlists', [PlaylistController::class, 'index']);
 
 // Obtener una Playlist específica
-Route::middleware('auth:sanctum')->get('/playlists/{id}', [PlaylistController::class, 'show']);
+Route::middleware('auth:api')->get('/playlists/{id}', [PlaylistController::class, 'show']);
 
 // Actualizar una Playlist
-Route::middleware('auth:sanctum')->put('/playlists/{id}', [PlaylistController::class, 'update']);
+Route::middleware('auth:api')->put('/playlists/{id}', [PlaylistController::class, 'update']);
 
 // Eliminar una Playlist
-Route::middleware('auth:sanctum')->delete('/playlists/{id}', [PlaylistController::class, 'destroy']);
-Route::middleware('auth:sanctum')->get('/users/{id}/playlists', [PlaylistController::class, 'getUserPlaylists']);
+Route::middleware('auth:api')->delete('/playlists/{id}', [PlaylistController::class, 'destroy']);
+Route::middleware('auth:api')->get('/users/{id}/playlists', [PlaylistController::class, 'getUserPlaylists']);
 
 //************************* RUTAS DE USUARIO Y VALIDACIÓN DE PIN ****************
 
 // Obtener usuario y usuarios restringidos
-Route::middleware('auth:sanctum')->get('/user', [HomeController::class, 'index']);
+Route::middleware('auth:api')->get('/user', [HomeController::class, 'index']);
 
 // Validar PIN del administrador
-Route::middleware('auth:sanctum')->post('/validateAdminPin', [HomeController::class, 'validateAdminPin']);
+Route::middleware('auth:api')->post('/validateAdminPin', [HomeController::class, 'validateAdminPin']);
 
 // Validar PIN del usuario restringido
-Route::middleware('auth:sanctum')->post('/validateRestrictedUserPin/{id}', [HomeController::class, 'validateRestrictedUserPin']);
+Route::middleware('auth:api')->post('/validateRestrictedUserPin/{id}', [HomeController::class, 'validateRestrictedUserPin']);
 
 
 //************************* Rutas de gestión de usuarios restringidos ****************
 
 // Obtener todos los usuarios restringidos
-Route::middleware('auth:sanctum')->get('/restrictedUsers', [RestrictedUserController::class, 'index']);
+Route::middleware('auth:api')->get('/restrictedUsers', [RestrictedUserController::class, 'index']);
 
 // Obtener un usuario restringido por ID
-Route::middleware('auth:sanctum')->get('/restrictedUsers/{id}', [RestrictedUserController::class, 'show']);
+Route::middleware('auth:api')->get('/restrictedUsers/{id}', [RestrictedUserController::class, 'show']);
 
 // Crear un nuevo usuario restringido
-Route::middleware('auth:sanctum')->post('/CreaterestrictedUsers', [RestrictedUserController::class, 'store']);
+Route::middleware('auth:api')->post('/CreaterestrictedUsers', [RestrictedUserController::class, 'store']);
 
 // Actualizar un usuario restringido
-Route::middleware('auth:sanctum')->post('/updateRestrictedUsers/{id}', [RestrictedUserController::class, 'update']);
+Route::middleware('auth:api')->post('/updateRestrictedUsers/{id}', [RestrictedUserController::class, 'update']);
 
 // Eliminar un usuario restringido
-Route::middleware('auth:sanctum')->delete('/DeleteUserRestricted/{id}', [RestrictedUserController::class, 'destroy']);
+Route::middleware('auth:api')->delete('/DeleteUserRestricted/{id}', [RestrictedUserController::class, 'destroy']);
 
 
 //*************************Verificar la cuenta con el correo******************************

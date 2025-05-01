@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Http;
 
 class TwoFactorAuthService
 {
@@ -27,22 +28,26 @@ class TwoFactorAuthService
 
     public function sendSmsVerification($phoneNumber, $code)
     {
-        // Implement your SMS sending logic here
-        // Example using a service like Twilio
         try {
-            // You'll need to install the Twilio SDK: composer require twilio/sdk
             $sid = env('TWILIO_SID');
             $token = env('TWILIO_AUTH_TOKEN');
             $twilioNumber = env('TWILIO_PHONE_NUMBER');
 
-            $twilio = new Client($sid, $token);
-            $twilio->messages->create(
-                "+506$phoneNumber",
-                [
-                    'from' => $twilioNumber,
-                    'body' => "Your KidsYT verification code is: $code"
-                ]
-            );
+            $url = "https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json";
+            $formattedPhoneNumber = '+506' . preg_replace('/\s+/', '', $phoneNumber);
+
+            $response = Http::withBasicAuth($sid, $token)
+                ->asForm()
+                ->post($url, [
+                    'To' => $formattedPhoneNumber,
+                    'From' => $twilioNumber,
+                    'Body' => "Your KidsYT verification code is: $code",
+                ]);
+
+            if (!$response->successful()) {
+                $errorMessage = $response->json()['message'] ?? 'Unknown error';
+                throw new \Exception("Twilio API Error: " . $errorMessage . " (HTTP status: " . $response->status() . ")");
+            }
 
             // Log successful SMS sending
             \Log::info("SMS verification sent to $phoneNumber");
@@ -52,7 +57,6 @@ class TwoFactorAuthService
             throw $e;
         }
     }
-
     public function verifyCode(Request $request)
     {
         $validator = Validator::make($request->all(), [
