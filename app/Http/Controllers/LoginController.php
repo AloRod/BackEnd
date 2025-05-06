@@ -40,7 +40,7 @@ class LoginController extends Controller
         if (!Hash::check($request->password, $user->password)) {
             return response()->json(['error' => 'Invalid credentials'], 401);  // If the password doesn't match
         }
-
+        //valida que la cuenta esté activa
         if ($user->status == 'pending') {
             return response()->json(
                 ['error' => 'Your account is not yet active. Please check your email and follow the instructions to activate it.', 'data' => $user],
@@ -54,10 +54,10 @@ class LoginController extends Controller
 
             $verificationCode = $this->tfaService->generateVerificationCode();
 
-            Cache::put('sms_code_' . $user->id, $verificationCode, now()->addMinutes(10));
+            Cache::put('sms_code_' . $user->id, $verificationCode, now()->addMinutes(10)); //se crea la palabra clave
 
-            \Log::info("SMS verification: $verificationCode");
-            $this->tfaService->sendSmsVerification($user->phone, $verificationCode);
+            \Log::info("SMS verification: $verificationCode"); //logs
+            $this->tfaService->sendSmsVerification($user->phone, $verificationCode); //sms
         }
 
        return response()->json([

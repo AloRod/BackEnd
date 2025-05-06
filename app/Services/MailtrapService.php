@@ -16,7 +16,7 @@ class MailtrapService
     protected string $defaultFromName;
     protected string $inboxId;
 
-    public function __construct()
+    public function __construct() //para consumir el API de mailtrap
     {
         $this->apiToken = env('MAILTRAP_API_TOKEN');
         $this->endpoint = 'https://sandbox.api.mailtrap.io/api/send';
@@ -42,13 +42,13 @@ class MailtrapService
         $subject = 'Activate your account';
 
         // Asegúrate de crear la vista: resources/views/emails/verify-account-mailtrap.blade.php
-        $htmlBody = View::make('emails.verify-account-mailtrap', [
+        $htmlBody = View::make('emails.verify-account-mailtrap', [ //asocia la vista
             'recipientName' => $recipientName,
             'verificationUrl' => $verificationUrl,
             'appName' => $this->defaultFromName,
         ])->render();
 
-
+        //formato que pide mailtrap para hacer uso de los servicios de ellos
         $payload = [
             'from' => [
                 'email' => $this->defaultFromEmail,
@@ -65,12 +65,12 @@ class MailtrapService
         ];
 
         try {
-            $response = Http::asJson()
-                ->withHeaders([
+            $response = Http::asJson() //cliente para hacer solicitudes
+                ->withHeaders([ //configura los headers
                     'Api-Token' => $this->apiToken,
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
-                ])->post($this->endpoint . '/' . $this->inboxId, $payload);
+                ])->post($this->endpoint . '/' . $this->inboxId, $payload); //realiza la peticion post a un url especifico
 
 
             Log::info("response");

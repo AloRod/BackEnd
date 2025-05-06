@@ -68,7 +68,7 @@ class TwoFactorAuthService
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $storedCode = Cache::get('sms_code_' . $request->user_id);
+        $storedCode = Cache::get('sms_code_' . $request->user_id); //recupera el codigo del mensaje
         $user = User::findOrFail($request->user_id);
 
         if (!$storedCode || $storedCode != $request->code) {

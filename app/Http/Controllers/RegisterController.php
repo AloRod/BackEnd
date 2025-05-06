@@ -20,7 +20,7 @@ class RegisterController extends Controller
     {
         $this->mailtrapService = $mailtrapService;
     }
-    private function getVerificationURL($user)
+    private function getVerificationURL($user) //ruta que procesa el front y el backend
     {
         if (!method_exists($user, 'getEmailForVerification')) {
             Log::warning('User model does not have getEmailForVerification method. Falling back to ->email.');
@@ -83,7 +83,7 @@ class RegisterController extends Controller
             'name' => 'required',
             'lastname' => 'required',
             'birthdate' => 'required|date',
-            'country' => 'required', 
+            'country' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -99,7 +99,7 @@ class RegisterController extends Controller
             return response()->json(['error' => 'You must be over 18 years old'], 403);
         }
 
-        
+
 
         // Create user
         $user = User::create([

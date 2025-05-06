@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class EmailVerificationController extends Controller
 {
-    private function checkURL($id, $hash)
+    private function checkURL($id, $hash) //verifica que la url sea valida
     {
         $user = User::find($id);
 

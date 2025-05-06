@@ -4,6 +4,7 @@
     <title>Activate your account</title>
     <style>
         /* Agrega estilos básicos para el correo */
+        /* Se crea el cuerpo del correo*/
         body { font-family: sans-serif; line-height: 1.6; color: #333; }
         .container { padding: 20px; }
         .button { display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff !important; background-color: #007bff; text-decoration: none; border-radius: 5px; }

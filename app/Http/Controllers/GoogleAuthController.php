@@ -97,7 +97,7 @@ class GoogleAuthController extends Controller
 
         // Create the user
 
-        $user = auth('api')->user();
+        $user = auth('api')->user(); //decodifica el token
 
         $user->update([
             'name' => $request->name,
